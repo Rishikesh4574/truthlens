@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthLens - Is This Real?</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+    <div id="toast-container"></div>
+    
+    <nav class="navbar">
+        <div class="logo">TruthLens<span class="dot">.</span></div>
+        <div class="nav-links">
+            <a href="#" data-route="landing" class="nav-link active">Home</a>
+            <a href="#" data-route="upload" class="nav-link">Analyze</a>
+            <a href="#" data-route="dashboard" class="nav-link">Dashboard</a>
+        </div>
+        <div class="nav-actions">
+            <button id="nav-auth-btn" class="btn btn-outline btn-sm">Sign In</button>
+        </div>
+    </nav>
+
+    <main id="app">
+        <!-- Landing Page -->
+        <section id="view-landing" class="view active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 class="headline">Is This <span class="highlight-text">Real?</span></h1>
+                    <p class="subtitle">AI-powered digital media forensics at your fingertips.</p>
+                    <div class="cta-group">
+                        <button class="btn btn-primary" onclick="App.navigate('upload')">Analyze Media</button>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="scan-line-container">
+                        <img src="truthlens.png" alt="TruthLens Deepfake comparison" class="hero-face">
+                        <div class="scan-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card glass-panel">
+                    <div class="icon-wrapper">🖼️</div>
+                    <h3>Image Detection</h3>
+                    <p>Detect GAN artifacts and face warping in photos.</p>
+                </div>
+                <div class="feature-card glass-panel">
+                    <div class="icon-wrapper">🎬</div>
+                    <h3>Video Detection</h3>
+                    <p>Analyze frame-by-frame for sync issues and temporal anomalies.</p>
+                </div>
+                <div class="feature-card glass-panel">
+                    <div class="icon-wrapper">🎵</div>
+                    <h3>Audio Detection</h3>
+                    <p>Spot cloned voices and synthesized audio fragments.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Upload Page -->
+        <section id="view-upload" class="view">
+            <div class="page-header">
+                <h2>Analyze Media</h2>
+                <p>Upload a file to detect deepfakes instantly.</p>
+            </div>
+            
+            <div class="upload-container">
+                <div id="drop-zone" class="drop-zone glass-panel">
+                    <div class="drop-illustration">📁</div>
+                    <p>Drag and drop your file here</p>
+                    <p class="file-limits">Accepts: .jpg, .png, .mp4, .wav, .mp3 (Max 500MB)</p>
+                    <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                    <input type="file" id="file-input" hidden accept=".jpg,.png,.mp4,.wav,.mp3">
+                </div>
+
+                <div id="file-preview-area" class="hidden">
+                    <div class="file-info glass-panel">
+                        <div class="file-details">
+                            <span id="file-type-badge" class="badge"></span>
+                            <span id="file-name">filename.jpg</span>
+                        </div>
+                        
+                        <!-- Gemini Nano Pre-screen Element -->
+                        <div id="nano-prescreen-badge" class="badge badge-loading">
+                            Quick Scan...
+                        </div>
+                    </div>
+                    
+                    <button id="btn-deep-analyze" class="btn btn-primary btn-full hidden">
+                        Deep Analyze
+                    </button>
+                    
+                    <div id="analysis-progress" class="progress-container hidden">
+                        <div class="progress-labels">
+                            <span id="progress-step-text">Uploading...</span>
+                            <span id="progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Page -->
+        <section id="view-results" class="view">
+            <div class="page-header">
+                <h2>Analysis Results</h2>
+                <button class="btn btn-outline btn-sm" onclick="App.navigate('upload')">Analyze Another</button>
+            </div>
+
+            <div class="results-grid">
+                <div id="verdict-card" class="verdict-card glass-panel">
+                    <div class="verdict-header">
+                        <div class="verdict-text-group">
+                            <h3 id="verdict-title" class="skeleton-text">Processing...</h3>
+                        </div>
+                        <div class="confidence-gauge skeleton-circle">
+                            <svg viewBox="0 0 36 36" class="circular-chart hidden" id="confidence-svg">
+                                <path class="circle-bg"
+                                    d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                                <path id="confidence-circle" class="circle"
+                                    stroke-dasharray="0, 100"
+                                    d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                                />
+                                <text id="confidence-text" x="18" y="20.35" class="percentage">0%</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="reason-chips" class="reason-chips">
+                        <!-- Chips injected here -->
+                    </div>
+                </div>
+
+                <div class="media-preview-card glass-panel">
+                    <div class="preview-header">
+                        <h3>Media Visualization</h3>
+                        <div class="controls" id="media-controls">
+                            <!-- e.g. Heatmap toggle -->
+                        </div>
+                    </div>
+                    <div id="media-visualization-container" class="visualization-area skeleton-box">
+                        <!-- Visualizations injected here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-actions">
+                <button class="btn btn-secondary">Download Report</button>
+            </div>
+        </section>
+        
+        <!-- Dashboard Page -->
+        <section id="view-dashboard" class="view">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card glass-panel">
+                    <h4>Total Scans</h4>
+                    <div class="stat-val">0</div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <h4>Deepfakes Caught</h4>
+                    <div class="stat-val highlight-red">0</div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <h4>Accuracy Rate</h4>
+                    <div class="stat-val highlight-teal">--%</div>
+                </div>
+            </div>
+
+            <div class="table-container glass-panel">
+                <div class="table-header">
+                    <h3>Recent Scans</h3>
+                    <div class="filters">
+                        <select class="select-input" id="dashboard-filter">
+                            <option value="all">All Media</option>
+                            <option value="image">Images</option>
+                            <option value="video">Video</option>
+                            <option value="audio">Audio</option>
+                            <option value="real">Real</option>
+                            <option value="fake">Fake</option>
+                        </select>
+                        <button class="btn btn-outline btn-sm btn-danger" id="btn-clear-history">Clear History</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Type</th>
+                                <th>Verdict</th>
+                                <th>Confidence</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scan-history-tbody">
+                            <!-- JS populated -->
+                            <tr>
+                                <td colspan="5" class="text-center empty-state">No scans yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button class="btn btn-sm btn-outline" disabled>Prev</button>
+                    <span>Page 1 of 1</span>
+                    <button class="btn btn-sm btn-outline" disabled>Next</button>
+                </div>
+            </div>
+        </section>
+        <!-- Auth Page (Login/Signup) -->
+        <section id="view-auth" class="view">
+            <div class="auth-container">
+                
+                <!-- Login Container -->
+                <div id="login-container" class="auth-card glass-panel">
+                    <div class="logo">TruthLens<span class="dot">.</span></div>
+                    <h2>Welcome Back</h2>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="login-email" class="form-control" placeholder="name@domain.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 1rem;">Sign In</button>
+                    </form>
+                    <div class="auth-toggle" style="margin-top: 1.5rem;">
+                        Don't have an account? <a href="#" id="auth-toggle-to-signup">Sign up</a>
+                    </div>
+                </div>
+
+                <!-- Signup Container -->
+                <div id="signup-container" class="auth-card glass-panel hidden">
+                    <div class="logo">TruthLens<span class="dot">.</span></div>
+                    <h2>Create Account</h2>
+                    <form id="signup-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="signup-name" class="form-control" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="signup-email" class="form-control" placeholder="name@domain.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="signup-password" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 1rem;">Create Account</button>
+                    </form>
+                    <div class="auth-toggle" style="margin-top: 1.5rem;">
+                        Already have an account? <a href="#" id="auth-toggle-to-login">Sign in</a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="trust-bar">
+        <span>Made by <strong>Lonewolfs</strong></span>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+      // Initialize Supabase Client for Frontend.
+      window.supabaseClient = supabase.createClient(
+        'https://btjhocewqlzgomygybxp.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0amhvY2V3cWx6Z29teWd5YnhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyODE1MDEsImV4cCI6MjA4ODg1NzUwMX0.8wY5go5MhmlBOVbEAEyi4XX-XdiqrVq2vsIiAStinV4'
+      );
+    </script>
+    <script src="js/gemini-nano.js"></script>
+    <script src="js/stitch-client.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
